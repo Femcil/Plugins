@@ -421,7 +421,7 @@ export default function Settings() {
 
       <RN.View style={{ height: 16 }} />
 
-      <RN.Text style={styles.versionText}>Version 0.1.1</RN.Text>
+      <RN.Text style={styles.versionText}>Version 0.1.2</RN.Text>
 
       <RN.View style={{ height: 32 }} />
     </ScrollView>

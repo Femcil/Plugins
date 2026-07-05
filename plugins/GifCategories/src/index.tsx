@@ -12,6 +12,7 @@ import { BASE_URL } from "./utils/constants";
 
 const GIFPickerStore = findByProps("getTrendingCategories");
 const GIFPickerCategoriesPage = findByTypeName("GIFPickerCategoriesPage");
+const GIFPickerHeader = findByTypeName("GIFPickerHeader");
 
 const LazyActionSheet = findByProps("openLazy", "hideActionSheet");
 const { FormRow, FormIcon } = Forms;
@@ -138,6 +139,21 @@ export default {
     fetchCustomCategories();
 
     patches.push(
+      after("type", GIFPickerHeader, (_, ret) => {
+        if (ret.props && currentCustomCategory) {
+          if (ret.props.children) {
+            if (ret.props.children.props.children) {
+              ret.props.children.props.children[1].props.children = currentCustomCategory.name;
+              after("onPress", ret.props.children.props, (args, ret) => {
+                currentCustomCategory = null;
+              })
+            }
+          }
+        }
+      })
+    );
+
+    patches.push(
       //Hook into trending categories to insert our own categories
       after("getTrendingCategories", GIFPickerStore, (args, ret) => {
         fetchCustomCategories();
@@ -213,9 +229,6 @@ export default {
 
         if (currentCustomCategory) {
           const customGifs = currentCustomCategory.gifs;
-
-          currentCustomCategory = null;
-
           return customGifs;
         }
 

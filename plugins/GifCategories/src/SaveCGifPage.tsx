@@ -107,6 +107,10 @@ function BetterTableRowGroup({title, icon, children,}: React.PropsWithChildren<{
     );
 }
 
+function isGifInCategory(category, gifSrc) {
+    return category.gifs?.some(gif => gif.src === gifSrc) || false;
+}
+
 export default function SaveCGifPage({ gifData }) {
     const [categories, setCategories] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
@@ -145,7 +149,7 @@ export default function SaveCGifPage({ gifData }) {
         }
     }
 
-    async function saveToCategory(categoryName) {
+    async function toggleGifInCategory(categoryName) {
         setSaving(true);
 
         try {
@@ -162,14 +166,22 @@ export default function SaveCGifPage({ gifData }) {
             });
 
             if (response.ok) {
-                showToast(`Saved to ${categoryName}`, getAssetIDByName("Check"));
+                const result = await response.json();
+                const action = result.action || 'updated';
+
+                if (action === 'removed') {
+                    showToast(`Removed from ${categoryName}`, getAssetIDByName("TrashIcon"));
+                } else {
+                    showToast(`Added to ${categoryName}`, getAssetIDByName("Check"));
+                }
+
                 await fetchCategories();
             } else {
-                showToast("Failed to save GIF", getAssetIDByName("Small"));
+                showToast("Failed to update GIF", getAssetIDByName("Small"));
             }
         } catch (error) {
-            console.error("Error saving gif:", error);
-            showToast("Error saving GIF", getAssetIDByName("Small"));
+            console.error("Error toggling gif:", error);
+            showToast("Error updating GIF", getAssetIDByName("Small"));
         } finally {
             setSaving(false);
         }
@@ -204,23 +216,25 @@ export default function SaveCGifPage({ gifData }) {
     return (
         <ScrollView style={{ flex: 1, backgroundColor: semanticColors.BACKGROUND_PRIMARY }}>
             <BetterTableRowGroup>
-                {categories.map((category, index) => (
-                <React.Fragment key={category.name}>
+                {categories.map((category, index) => {
+                    const gifExists = isGifInCategory(category, gifData.src);
 
-                    <FormRow
-                        key={category.name}
-                        label={category.name}
-                        subLabel={`${category.gifs?.length || 0} GIFs`}
-
-                        trailing={FormArrow}
-                        onPress={() => saveToCategory(category.name)}
-                        disabled={saving}
-                    />
-                    {index < categories.length - 1 && (<Forms.FormDivider />)}
-                </React.Fragment>
-
-
-                ))}
+                    return (
+                        <React.Fragment key={category.name}>
+                            <FormRow
+                                label={category.name}
+                                subLabel={gifExists
+                                    ? `${category.gifs?.length || 0} GIFs • Already added`
+                                    : `${category.gifs?.length || 0} GIFs`
+                                }
+                                trailing={FormArrow}
+                                onPress={() => toggleGifInCategory(category.name)}
+                                disabled={saving}
+                            />
+                            {index < categories.length - 1 && (<Forms.FormDivider />)}
+                        </React.Fragment>
+                    );
+                })}
             </BetterTableRowGroup>
 
             <View style={{ height: 32 }} />
@@ -228,7 +242,7 @@ export default function SaveCGifPage({ gifData }) {
             {saving && (
                 <View style={styles.savingOverlay}>
                     <ActivityIndicator size="large" color="#fff" />
-                    <Text style={styles.savingText}>Saving...</Text>
+                    <Text style={styles.savingText}>Updating...</Text>
                 </View>
             )}
         </ScrollView>
