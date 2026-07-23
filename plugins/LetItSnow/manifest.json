@@ -1,14 +1,15 @@
 {
-    "name": "Let it Snow",
-    "description": "Render Snowflakes on the screen",
+    "name": "Falling Cherry Leaves",
+    "description": "Render Falling cherry leaves on the screen",
     "authors": [
         {
-            "name": "Bwlok",
-            "id": "501827585806827520"
+            "name": "Femcil",
+            "id": "1002047938358431774"
         }
     ],
-    "main": "src/index.tsx",
     "vendetta": {
-        "icon": "wumpus_snowglobe_premium120"
-    }
+        "icon": "ic_progress_wrench_24px"
+    },
+    "main": "src/index.tsx",
+    "hash": ""
 }
